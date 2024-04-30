@@ -1,0 +1,24 @@
+services:
+  rabbit:
+    hostname: rabbit
+    image: rabbitmq:3.11-management
+    ports: 
+      - "5672:5672"
+      - "15672:15672"
+  worker:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbit
+    command: celery -A parser.tasks worker --loglevel=INFO
+  producer:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbit
+      - worker
+    container_name: producer
+    command: tail -f /dev/null
+      

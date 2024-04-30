@@ -7,7 +7,7 @@ from celery import Celery
 import celery
 
 
-app = Celery('tasks', broker='pyamqp://guest@localhost//')
+app = Celery('tasks', broker='pyamqp://guest@rabbit//')
 
 
 class ParseHtml(celery.Task):
