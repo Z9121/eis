@@ -21,14 +21,12 @@ class ParseHtml(celery.Task):
         }
         try:
             response = requests.get(url, headers=headers)
-            if response.status_code != 200:
-                raise HTTPError()
             soup = BeautifulSoup(response.text, 'html.parser')
             atags = soup.select('.w-space-nowrap a[target]')
             links = [urljoin('https://zakupki.gov.ru',
                              tag.get('href').replace('view.html', 'viewXml.html'))
                      for tag in atags]
-        except (RequestException, Exception) as exc:
+        except Exception as exc:
             raise self.retry(exc=exc)
         for link in links:
             parse_xml.delay(link)
@@ -45,10 +43,8 @@ class ParseXml(celery.Task):
         }
         try:
             response = requests.get(url, headers=headers)
-            if response.status_code != 200:
-                raise HTTPError()
             soup = BeautifulSoup(response.text, 'xml')
-        except (RequestException, Exception) as exc:
+        except Exception as exc:
             raise self.retry(exc=exc)
         print('{}: {}'.format(url, soup.publishDTInEIS.string))
 
